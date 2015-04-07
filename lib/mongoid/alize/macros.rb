@@ -36,7 +36,7 @@ module Mongoid
         end
 
         (klass.alize_from_callbacks ||= []) << callback =
-          callback_klass.new(klass, relation, fields)
+          callback_klass.new(klass, relation, fields, options)
         callback.attach
 
       end
@@ -56,7 +56,7 @@ module Mongoid
         end
 
         (klass.alize_to_callbacks ||= []) << callback =
-          Mongoid::Alize::ToCallback.new(klass, relation, fields)
+          Mongoid::Alize::ToCallback.new(klass, relation, fields, options)
         callback.attach
 
       end

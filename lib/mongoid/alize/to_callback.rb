@@ -18,7 +18,6 @@ module Mongoid
         klass.class_eval <<-CALLBACK, __FILE__, __LINE__ + 1
 
           def #{callback_name}#{force_param}
-
             #{iterable_relation}.each do |relation|
               next if relation.attributes.frozen?
 
@@ -121,7 +120,7 @@ module Mongoid
       end
 
       def iterable_relation
-        "[self.#{relation}].flatten.compact"
+        "self.#{relation}.to_a.compact"
       end
 
       def set_callback

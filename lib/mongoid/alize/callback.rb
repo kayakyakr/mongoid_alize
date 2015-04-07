@@ -7,6 +7,7 @@ module Mongoid
       attr_accessor :klass
       attr_accessor :relation
       attr_accessor :metadata
+      attr_accessor :options
 
       attr_accessor :inverse_klass
       attr_accessor :inverse_relation
@@ -14,12 +15,13 @@ module Mongoid
 
       attr_accessor :debug
 
-      def initialize(_klass, _relation, _denorm_attrs)
+      def initialize(_klass, _relation, _denorm_attrs, options = {})
         self.debug = ENV["ALIZE_DEBUG"]
 
         self.klass = _klass
         self.relation = _relation
         self.denorm_attrs = _denorm_attrs
+        self.options = options
 
         self.metadata = _klass.relations[_relation.to_s]
         if !(self.metadata.polymorphic? &&
@@ -77,13 +79,20 @@ module Mongoid
 
       def field_values(source, options={})
         extras = options[:id] ? "['_id']" : "[]"
-        <<-RUBY
-          value = (#{denorm_attrs_name}(#{source}) + #{extras}).inject({}) do |hash, name|
-            hash[name] = #{source}.send(name)
-            hash
-          end
-          value.respond_to?(:mongoize) ? value.mongoize : value
-        RUBY
+        if serializer = self.options[:serializer]
+          <<-RUBY
+            value = #{serializer}.new(#{source}).as_json
+            value.respond_to?(:mongoize) ? value.mongoize : value
+          RUBY
+        else
+          <<-RUBY
+            value = (#{denorm_attrs_name}(#{source}) + #{extras}).inject({}) do |hash, name|
+              hash[name] = #{source}.send(name)
+              hash
+            end
+            value.respond_to?(:mongoize) ? value.mongoize : value
+          RUBY
+        end
       end
 
       def force_param
