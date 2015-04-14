@@ -70,10 +70,10 @@ module Mongoid
 
       def pull_from_inverse
         <<-RUBIES
-          #{relation_pull('prefixed_name', '{ "_id" => self.id }')}
+          #{relation_pull('prefixed_name', '{"$or" => [{ "_id" => self.id }, { "id" => self.id }]}')}
           if _f = relation.send(prefixed_name)
             _f.reject! do |hash|
-              hash["_id"] == self.id
+              hash["_id"] == self.id || hash["id"] == self.id
             end
           end
         RUBIES
