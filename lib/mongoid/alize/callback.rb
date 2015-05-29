@@ -81,7 +81,7 @@ module Mongoid
         extras = options[:id] ? "['_id']" : "[]"
         if serializer = self.options[:serializer]
           <<-RUBY
-            value = #{serializer}.new(#{source}).as_json
+            value = #{serializer}.new(#{source}).attributes
             value.respond_to?(:mongoize) ? value.mongoize : value
           RUBY
         else
